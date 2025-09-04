@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        
+        .converter-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 50px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .convert-btn {
+            width: 100%;
+            padding: 12px;
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .convert-btn:hover {
+            background: #5a54d6;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .result-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .rate-info {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-container">
+        <h1 class="title">Currency Converter</h1>
+        
+        <div class="form-group">
+            <label>Source Currency</label>
+            <select id="fromCurrency">
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR" selected>EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Target Currency</label>
+            <select id="toCurrency">
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+                <option value="INR" selected>INR - Indian Rupee</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="amount" value="5000" placeholder="Enter amount">
+        </div>
+        
+        <button class="convert-btn" onclick="convertCurrency()">CONVERT</button>
+        
+        <div class="result-box" id="result" style="display: none;">
+            <div style="color: #22c55e; font-size: 14px; margin-bottom: 5px;">
+                Conversion completed successfully!
+            </div>
+            <div class="result-amount" id="resultAmount">₹507,750.00</div>
+            <div class="rate-info" id="rateInfo">1 EUR = 101.5500 INR</div>
+        </div>
+    </div>
+
+    <script>
+        const rates = {
+            'EUR_INR': 101.55,
+            'USD_INR': 83.12,
+            'GBP_INR': 101.55,
+            'EUR_USD': 1.18,
+            'USD_EUR': 0.85,
+            'GBP_USD': 1.37,
+            'USD_GBP': 0.73,
+            'INR_USD': 0.012,
+            'INR_EUR': 0.0098,
+            'JPY_USD': 0.0067,
+            'USD_JPY': 149.50,
+            'AUD_USD': 0.65,
+            'USD_AUD': 1.54,
+            'CAD_USD': 0.74,
+            'USD_CAD': 1.35
+        };
+
+        const symbols = {
+            'USD': '$',
+            'EUR': '€', 
+            'GBP': '£',
+            'JPY': '¥',
+            'INR': '₹',
+            'AUD': 'A$',
+            'CAD': 'C$'
+        };
+
+        function convertCurrency() {
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            let rate = 1;
+            const key = from + '_' + to;
+            const reverseKey = to + '_' + from;
+            
+            if (rates[key]) {
+                rate = rates[key];
+            } else if (rates[reverseKey]) {
+                rate = 1 / rates[reverseKey];
+            } else if (from === to) {
+                rate = 1;
+            }
+            
+            const result = amount * rate;
+            const symbol = symbols[to] || to;
+            
+            document.getElementById('resultAmount').textContent = 
+                symbol + result.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById('rateInfo').textContent = 
+                `1 ${from} = ${rate.toFixed(4)} ${to}`;
+            
+            document.getElementById('result').style.display = 'block';
+        }
+
+        // Auto convert on page load for demo
+        window.onload = function() {
+            convertCurrency();
+        };
+    </script>
+</body>
+</html>
